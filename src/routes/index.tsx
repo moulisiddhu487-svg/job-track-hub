@@ -1,6 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Briefcase, Plus, Pencil, Trash2, MapPin, Calendar } from "lucide-react";
+import {
+  Briefcase,
+  Plus,
+  Pencil,
+  Trash2,
+  MapPin,
+  Calendar,
+  PieChart as PieIcon,
+  BarChart3,
+  Inbox,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +33,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ApplicationForm } from "@/components/application-form";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { StatusPieChart } from "@/components/status-pie-chart";
+import { WeeklyBarChart } from "@/components/weekly-bar-chart";
 import {
   type Application,
   type ApplicationInput,
@@ -54,10 +67,24 @@ export const Route = createFileRoute("/")({
 const STATUSES: ApplicationStatus[] = ["Applied", "Interview", "Offer", "Rejected"];
 
 const STATUS_STYLES: Record<ApplicationStatus, string> = {
-  Applied: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20",
-  Interview: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20",
-  Offer: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20",
-  Rejected: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20",
+  Applied: "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30",
+  Interview: "bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30",
+  Offer: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+  Rejected: "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30",
+};
+
+const STATUS_DOT: Record<ApplicationStatus, string> = {
+  Applied: "bg-blue-500",
+  Interview: "bg-amber-500",
+  Offer: "bg-emerald-500",
+  Rejected: "bg-rose-500",
+};
+
+const CARD_GRADIENT: Record<ApplicationStatus, string> = {
+  Applied: "card-gradient-applied",
+  Interview: "card-gradient-interview",
+  Offer: "card-gradient-offer",
+  Rejected: "card-gradient-rejected",
 };
 
 function Dashboard() {
@@ -128,10 +155,10 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6">
+      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-sm">
               <Briefcase className="h-5 w-5" />
             </div>
             <div>
@@ -143,24 +170,32 @@ function Dashboard() {
               </p>
             </div>
           </div>
-          <Button
-            onClick={() => {
-              setEditing(null);
-              setDialogOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            New
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button
+              onClick={() => {
+                setEditing(null);
+                setDialogOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              New
+            </Button>
+          </div>
         </div>
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          {STATUSES.map((s) => (
-            <Card key={s}>
+          {STATUSES.map((s, i) => (
+            <Card
+              key={s}
+              className={`${CARD_GRADIENT[s]} animate-fade-up border-border/60 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md`}
+              style={{ animationDelay: `${i * 60}ms` }}
+            >
               <CardHeader className="pb-2">
-                <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                <CardTitle className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <span className={`h-2 w-2 rounded-full ${STATUS_DOT[s]}`} />
                   {s}
                 </CardTitle>
               </CardHeader>
@@ -176,6 +211,31 @@ function Dashboard() {
               </CardContent>
             </Card>
           ))}
+        </section>
+
+        <section className="mt-6 grid gap-4 lg:grid-cols-5">
+          <Card className="animate-fade-up lg:col-span-2" style={{ animationDelay: "240ms" }}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <PieIcon className="h-4 w-4 text-muted-foreground" />
+                Status breakdown
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StatusPieChart counts={counts} />
+            </CardContent>
+          </Card>
+          <Card className="animate-fade-up lg:col-span-3" style={{ animationDelay: "300ms" }}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm font-semibold">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                Applications per week
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <WeeklyBarChart apps={apps} />
+            </CardContent>
+          </Card>
         </section>
 
         <section className="mt-8">
@@ -199,15 +259,19 @@ function Dashboard() {
                 Loading…
               </p>
             ) : visible.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                    <Briefcase className="h-5 w-5 text-muted-foreground" />
+              <Card className="animate-fade-up border-dashed">
+                <CardContent className="flex flex-col items-center gap-4 py-16 text-center">
+                  <div className="relative">
+                    <div className="absolute inset-0 animate-pulse rounded-full bg-primary/20 blur-2xl" />
+                    <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 ring-1 ring-border">
+                      <Inbox className="h-9 w-9 text-primary" />
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">No applications yet</p>
-                    <p className="text-sm text-muted-foreground">
-                      Track your first job application to get started.
+                  <div className="space-y-1">
+                    <p className="text-lg font-semibold">No applications yet</p>
+                    <p className="max-w-xs text-sm text-muted-foreground">
+                      Start tracking your job search. Add your first application
+                      to see status breakdowns and weekly trends.
                     </p>
                   </div>
                   <Button
@@ -223,8 +287,12 @@ function Dashboard() {
               </Card>
             ) : (
               <div className="grid gap-3">
-                {visible.map((a) => (
-                  <Card key={a.id}>
+                {visible.map((a, i) => (
+                  <Card
+                    key={a.id}
+                    className="animate-fade-up group border-border/60 transition-all hover:border-primary/40 hover:shadow-md"
+                    style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}
+                  >
                     <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
@@ -233,6 +301,7 @@ function Dashboard() {
                             variant="outline"
                             className={STATUS_STYLES[a.status]}
                           >
+                            <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${STATUS_DOT[a.status]}`} />
                             {a.status}
                           </Badge>
                         </div>
@@ -257,7 +326,7 @@ function Dashboard() {
                           </p>
                         )}
                       </div>
-                      <div className="flex gap-2 self-end sm:self-center">
+                      <div className="flex gap-2 self-end opacity-80 transition-opacity group-hover:opacity-100 sm:self-center">
                         <Button
                           size="icon"
                           variant="outline"
