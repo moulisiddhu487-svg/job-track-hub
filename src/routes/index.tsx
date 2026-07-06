@@ -1,3 +1,4 @@
+import { JobSearch } from "@/components/job-search";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -238,6 +239,7 @@ function Dashboard() {
           </Card>
         </section>
 
+        <JobSearch />
         <section className="mt-8">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-base font-semibold">Applications</h2>
