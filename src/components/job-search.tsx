@@ -27,7 +27,7 @@ export function JobSearch() {
     setSearched(true);
     try {
       const res = await fetch(
-        `http://localhost:4000/jobs/search?keyword=${keyword}&location=${location}`
+        `${import.meta.env.VITE_API_URL}/jobs/search?keyword=${keyword}&location=${location}`
       );
       const data = await res.json();
 console.log("Jobs received:", data);

@@ -13,9 +13,7 @@ export interface Application {
 
 export type ApplicationInput = Omit<Application, "id" | "created_at">;
 
-const API_URL =
-  (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_API_URL) ||
-  "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 const LS_KEY = "job-applications-fallback";
 
